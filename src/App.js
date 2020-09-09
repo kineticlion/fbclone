@@ -1,26 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, FormControl, InputLabel, Input } from "@material-ui/core";
+import firebase from "firebase";
 
 import "./App.css";
 import Message from "./Message";
+import db from "./firebase";
 
 function App() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    db.collection("messages")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) => {
+        setMessages(snapshot.docs.map((doc) => doc.data()));
+      });
+  }, []);
+
+  useEffect(() => {
+    setUsername(prompt("Please enter your name"));
+  }, []);
 
   const handleMessageSend = (event) => {
     //logic to send messages
     event.preventDefault();
-    setMessages([...messages, input]);
+    db.collection("messages").add({
+      username,
+      message: input,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
     setInput("");
   };
 
   return (
     <div className="App">
       <h1>
-        Hello from kineticlion!{" "}
+        Welcome {`${username}! `}
         <span role="img" aria-label="rocket-emoji">
-          🚀
+          😊
         </span>
       </h1>
       <form>
@@ -43,7 +62,7 @@ function App() {
           </Button>
         </FormControl>
         {messages.map((message) => (
-          <Message text={message} />
+          <Message username={username} message={message} />
         ))}
       </form>
     </div>

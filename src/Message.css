@@ -1,0 +1,9 @@
+.message {
+  width: fit-content;
+  padding: 10px;
+  margin: 10px;
+}
+
+.message_user {
+  margin-left: auto;
+}
